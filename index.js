@@ -31,7 +31,48 @@ async function run() {
       // Connect the client to the server	(optional starting in v4.7)
       //   await client.connect();
       // Send a ping to confirm a successful connection
-      const statesCollection = client.db("luxState").collection("states");
+      const statesCollection = client.db("luxState").collection("estates");
+
+      // estates related APIs
+
+      app.get("/estates", async (req, res) => {
+         const country = req.query.country;
+         const size = req.query.size;
+         const status = req.query.status;
+
+         // Build the query object dynamically
+         let query = {};
+         if (country) {
+            query["location.country"] = country;
+         }
+         if (size) {
+            query["area"] = { $lte: parseInt(size) };
+         }
+         if (status) {
+            query["status"] = status;
+         }
+
+         try {
+            const result = await statesCollection.find(query).toArray();
+            res.send(result);
+         } catch (error) {
+            console.error(error);
+            res.status(500).send("An error occurred while fetching estates");
+         }
+      });
+
+      app.get("/featured", async (req, res) => {
+         const query = { featured: true };
+         try {
+            const result = await statesCollection.find(query).toArray();
+            res.send(result);
+         } catch (error) {
+            console.error(error);
+            res.status(500).send(
+               "An error occurred while fetching featured estates"
+            );
+         }
+      });
 
       console.log(
          "Pinged your deployment. You successfully connected to MongoDB!"
