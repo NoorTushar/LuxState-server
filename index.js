@@ -32,6 +32,7 @@ async function run() {
       //   await client.connect();
       // Send a ping to confirm a successful connection
       const statesCollection = client.db("luxState").collection("estates");
+      const usersCollection = client.db("luxState").collection("users");
 
       // estates related APIs
 
@@ -72,6 +73,22 @@ async function run() {
                "An error occurred while fetching featured estates"
             );
          }
+      });
+
+      // ======= user related APIs =======
+
+      // get all the users
+      app.get("/users", async (req, res) => {
+         const result = await usersCollection.find().toArray();
+         res.send(result);
+      });
+
+      // create a new user and store in our database
+      app.post("/users", async (req, res) => {
+         const user = req.body;
+
+         const result = await usersCollection.insertOne(user);
+         res.send(result);
       });
 
       console.log(
