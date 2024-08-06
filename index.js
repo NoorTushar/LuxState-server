@@ -33,6 +33,7 @@ async function run() {
       // Send a ping to confirm a successful connection
       const statesCollection = client.db("luxState").collection("estates");
       const usersCollection = client.db("luxState").collection("users");
+      const servicesCollection = client.db("luxState").collection("services");
 
       // estates related APIs
 
@@ -75,7 +76,7 @@ async function run() {
          }
       });
 
-      // ======= user related APIs =======
+      // ======= Start: Users related APIs =======
 
       // get all the users
       app.get("/users", async (req, res) => {
@@ -90,6 +91,18 @@ async function run() {
          const result = await usersCollection.insertOne(user);
          res.send(result);
       });
+
+      // ======= End: Users related APIs =======
+
+      // ======= Start: Services related APIs =======
+
+      // get all the services
+      app.get("/services", async (req, res) => {
+         const result = await servicesCollection.find().toArray();
+         res.send(result);
+      });
+
+      // ======= End: Services related APIs =======
 
       console.log(
          "Pinged your deployment. You successfully connected to MongoDB!"
