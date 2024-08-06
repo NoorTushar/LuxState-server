@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const nodemailer = require("nodemailer");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const cors = require("cors");
 require("dotenv").config();
@@ -103,6 +104,34 @@ async function run() {
       });
 
       // ======= End: Services related APIs =======
+
+      // Route to handle form submissions
+      app.post("/contact", async (req, res) => {
+         const { firstName, lastName, address, email, comment } = req.body;
+         console.log(req.body);
+         const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+               user: process.env.EMAIL_USER, // Sender email address
+               pass: process.env.EMAIL_PASS, // Sender email password
+            },
+         });
+
+         const mailOptions = {
+            from: process.env.EMAIL_USER, // Sender email address
+            to: "blspacer@gmail.com", // Recipient email address
+            subject: "New Contact Message",
+            text: `You have received a new message from ${firstName} ${lastName} (${email}).\n\nAddress: ${address}\n\nComment: ${comment}`,
+         };
+
+         try {
+            await transporter.sendMail(mailOptions);
+            res.status(200).send("Message sent successfully");
+         } catch (error) {
+            console.error("Error sending email:", error);
+            res.status(500).send("Error sending message");
+         }
+      });
 
       console.log(
          "Pinged your deployment. You successfully connected to MongoDB!"
