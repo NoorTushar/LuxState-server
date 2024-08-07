@@ -107,7 +107,8 @@ async function run() {
 
       // Route to handle form submissions
       app.post("/contact", async (req, res) => {
-         const { firstName, lastName, address, email, comment } = req.body;
+         const { firstName, lastName, address, email, comment, phone } =
+            req.body;
          console.log(req.body);
          const transporter = nodemailer.createTransport({
             service: "gmail",
@@ -120,8 +121,8 @@ async function run() {
          const mailOptions = {
             from: process.env.EMAIL_USER, // Sender email address
             to: "blspacer@gmail.com", // Recipient email address
-            subject: "New Contact Message",
-            text: `You have received a new message from ${firstName} ${lastName} (${email}).\n\nAddress: ${address}\n\nComment: ${comment}`,
+            subject: "Message from Website",
+            text: `You have received a new message from ${firstName} ${lastName} (${email}).\n\nAddress: ${address}\n\nComment: ${comment} \n\nContact Number: ${phone}`,
          };
 
          try {
