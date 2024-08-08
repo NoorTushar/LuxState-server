@@ -42,11 +42,15 @@ async function run() {
          const country = req.query.country;
          const size = req.query.size;
          const status = req.query.status;
-
+         const division = req.query.division;
+         console.log(division);
          // Build the query object dynamically
          let query = {};
          if (country) {
             query["location.country"] = country;
+         }
+         if (division) {
+            query["location.division"] = division;
          }
          if (size) {
             query["area"] = { $lte: parseInt(size) };
@@ -64,6 +68,47 @@ async function run() {
          }
       });
 
+      // get all unique countries
+      app.get("/countries", async (req, res) => {
+         // this will get all the unique countries and divisions
+         try {
+            const results = await statesCollection
+               .aggregate([
+                  {
+                     $group: {
+                        _id: null,
+                        uniqueCountries: { $addToSet: "$location.country" },
+                        uniqueDivisions: { $addToSet: "$location.division" },
+                     },
+                  },
+                  {
+                     $project: {
+                        _id: 0,
+                        uniqueCountries: 1,
+                        uniqueDivisions: 1,
+                     },
+                  },
+               ])
+               .toArray();
+
+            if (results.length > 0) {
+               res.send({
+                  countries: results[0].uniqueCountries,
+                  divisions: results[0].uniqueDivisions,
+               });
+            } else {
+               res.send({ countries: [], divisions: [] });
+            }
+         } catch (error) {
+            console.error("Error fetching countries:", error);
+            res.status(500).send({
+               error: "An error occurred while fetching countries.",
+            });
+         }
+      });
+
+      // ======= Start: Featured APIs =======
+
       app.get("/featured", async (req, res) => {
          const query = { featured: true };
          try {
@@ -76,6 +121,8 @@ async function run() {
             );
          }
       });
+
+      // ======= End: Featured APIs =======
 
       // ======= Start: Users related APIs =======
 
