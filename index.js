@@ -36,8 +36,9 @@ async function run() {
       const usersCollection = client.db("luxState").collection("users");
       const servicesCollection = client.db("luxState").collection("services");
 
-      // estates related APIs
+      // ======= Start: States related APIs =======
 
+      // get all the states, also based on queries
       app.get("/estates", async (req, res) => {
          const country = req.query.country;
          const size = req.query.size;
@@ -67,6 +68,40 @@ async function run() {
             res.status(500).send("An error occurred while fetching estates");
          }
       });
+
+      // get all the rent commercial properties
+      app.get("/rent-comm", async (req, res) => {
+         const result = await statesCollection
+            .find({ category: "commercial", status: "rent" })
+            .toArray();
+         res.send(result);
+      });
+
+      // get all the rent residential properties
+      app.get("/rent-res", async (req, res) => {
+         const result = await statesCollection
+            .find({ category: "residential", status: "rent" })
+            .toArray();
+         res.send(result);
+      });
+
+      // get all the buy commercial properties
+      app.get("/buy-comm", async (req, res) => {
+         const result = await statesCollection
+            .find({ category: "commercial", status: "buy" })
+            .toArray();
+         res.send(result);
+      });
+
+      // get all the buy commercial properties
+      app.get("/buy-res", async (req, res) => {
+         const result = await statesCollection
+            .find({ category: "residential", status: "buy" })
+            .toArray();
+         res.send(result);
+      });
+
+      // ======= End: States related APIs =======
 
       // get all unique countries
       app.get("/countries", async (req, res) => {
