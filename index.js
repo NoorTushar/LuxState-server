@@ -60,6 +60,7 @@ async function run() {
             query["status"] = status;
          }
 
+         console.log(query);
          try {
             const result = await statesCollection.find(query).toArray();
             res.send(result);
@@ -67,6 +68,18 @@ async function run() {
             console.error(error);
             res.status(500).send("An error occurred while fetching estates");
          }
+      });
+
+      // get recent properties
+      app.get("/recent", async (req, res) => {
+         const result = await statesCollection
+            .find({
+               "location.country": "Bangladesh",
+               "location.division": "Dhaka",
+            })
+            .limit(4)
+            .toArray();
+         res.send(result);
       });
 
       // get all the rent commercial properties
