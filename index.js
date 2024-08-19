@@ -155,6 +155,49 @@ async function run() {
          }
       });
 
+      // get all unique countries only, different logic
+      app.get("/uniqueCountries", async (req, res) => {
+         // here we will get all the estates data with only country fields
+         const countries = await statesCollection
+            .find({}, { projection: { "location.country": 1, _id: 0 } })
+            .toArray();
+
+         // create an array which will have unique country names
+         const uniqueCountries = [];
+
+         // now map the mongoDb data and for each item check if
+         // the country name is already present in the unique country array.
+         // if not then push.
+         countries.forEach((country) => {
+            if (!uniqueCountries.includes(country.location.country)) {
+               uniqueCountries.push(country.location.country);
+            }
+         });
+
+         // return the unique countries as response
+         res.send(uniqueCountries);
+      });
+
+      // get unique divisions based on a country selected
+      app.get("/uniqueDivisions", async (req, res) => {
+         const selectedCountry = req.query.country;
+         const data = await statesCollection
+            .find({}, { projection: { location: 1, _id: 0 } })
+            .toArray();
+
+         const uniqueDivisions = [];
+
+         data.forEach((eachData) => {
+            if (eachData.location.country === selectedCountry) {
+               if (!uniqueDivisions.includes(eachData.location.division)) {
+                  uniqueDivisions.push(eachData.location.division);
+               }
+            }
+         });
+
+         res.send(uniqueDivisions);
+      });
+
       // ======= Start: Featured APIs =======
 
       app.get("/featured", async (req, res) => {
