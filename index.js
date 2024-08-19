@@ -232,6 +232,29 @@ async function run() {
          res.send(uniqueAreas);
       });
 
+      // search api for the search page
+      // Backend endpoint to handle search queries
+      app.get("/search", async (req, res) => {
+         const { options, type, country, area } = req.query;
+
+         // Build the query dynamically based on the provided parameters
+         const query = {};
+         if (options) query.status = options;
+         if (type) query.category = type;
+         if (country) query["location.country"] = country;
+         if (area) query["location.area"] = area;
+
+         console.log(query);
+         try {
+            const results = await statesCollection.find(query).toArray();
+            res.send(results);
+         } catch (error) {
+            res.status(500).send({
+               error: "An error occurred while fetching data",
+            });
+         }
+      });
+
       // ======= Start: Featured APIs =======
 
       app.get("/featured", async (req, res) => {
