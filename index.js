@@ -198,6 +198,40 @@ async function run() {
          res.send(uniqueDivisions);
       });
 
+      // get unique areas based on a country selected
+      app.get("/uniqueAreas", async (req, res) => {
+         const selectedCountry = req.query.country;
+         const data = await statesCollection
+            .find({}, { projection: { location: 1, _id: 0 } })
+            .toArray();
+
+         const uniqueAreas = [];
+
+         data.forEach((eachData) => {
+            const area = eachData.location.area;
+            const country = eachData.location.country;
+
+            if (selectedCountry) {
+               // When a country is selected
+               if (country === selectedCountry) {
+                  // Check if the area matches the selected country
+                  if (area && !uniqueAreas.includes(area)) {
+                     // Add area to uniqueAreas if it is not already included
+                     uniqueAreas.push(area);
+                  }
+               }
+            } else {
+               // When no country is selected
+               if (area && !uniqueAreas.includes(area)) {
+                  // Add area to uniqueAreas if it is not already included
+                  uniqueAreas.push(area);
+               }
+            }
+         });
+
+         res.send(uniqueAreas);
+      });
+
       // ======= Start: Featured APIs =======
 
       app.get("/featured", async (req, res) => {
