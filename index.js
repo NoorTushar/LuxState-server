@@ -44,6 +44,7 @@ async function run() {
          const size = req.query.size;
          const status = req.query.status;
          const division = req.query.division;
+         const type = req.query.type;
          console.log(division);
          // Build the query object dynamically
          let query = {};
@@ -58,6 +59,9 @@ async function run() {
          }
          if (status) {
             query["status"] = status;
+         }
+         if (type) {
+            query["category"] = type;
          }
 
          console.log(query);
@@ -316,8 +320,10 @@ async function run() {
          const mailOptions = {
             from: process.env.EMAIL_USER, // Sender email address
             to: "blspacer@gmail.com", // Recipient email address
-            subject: "Message from Website",
-            text: `You have received a new message from ${firstName} ${lastName} (${email}).\n\nAddress: ${address}\n\nComment: ${comment} \n\nContact Number: ${phone}`,
+            // to: "support@viva.com",
+            subject: "Viva support - Requesting support",
+            // text: `You have received a new message from ${firstName} ${lastName} (${email}).\n\nAddress: ${address}\n\nComment: ${comment} \n\nContact Number: ${phone}`,
+            text: `You have received a new message from ${firstName} ${lastName} (${email}).\n\nComment: ${comment} \n\nContact Number: ${phone}`,
          };
 
          try {
