@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const nodemailer = require("nodemailer");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 require("dotenv").config();
 const port = process.env.PORT || 3000;
@@ -35,16 +35,59 @@ async function run() {
       const statesCollection = client.db("luxState").collection("estates");
       const usersCollection = client.db("luxState").collection("users");
       const servicesCollection = client.db("luxState").collection("services");
+      const propertiesCollection = client
+         .db("luxState")
+         .collection("properties");
 
       // ======= Start: States related APIs =======
 
+      // == New Property Schema Related APIs Start ==
+      // get state details based on id
+
+      app.get("/property/:id", async (req, res) => {
+         const id = req.params.id;
+         console.log(id);
+
+         const query = { _id: new ObjectId(id) };
+         const result = await propertiesCollection.findOne(query);
+         res.send(result);
+      });
+
+      // get all properties
+      app.get("/properties", async (req, res) => {
+         const result = await propertiesCollection.find().toArray();
+         res.send(result);
+      });
+
+      // == New Property Schema Related APIs End ==
+
       // get all the states, also based on queries
       app.get("/estates", async (req, res) => {
+         // Perform the aggregation
+         const maxPriceResult = await statesCollection
+            .aggregate([
+               {
+                  $group: {
+                     _id: null, // Grouping by null to aggregate the entire collection
+                     maxPrice: { $max: "$price" },
+                  },
+               },
+            ])
+            .toArray(); // Convert the aggregation cursor to an array
+
+         // Extract the maxPrice from the result
+         const maxPrice =
+            maxPriceResult.length > 0 ? maxPriceResult[0].maxPrice : null;
+
+         console.log(maxPrice);
+
          const country = req.query.country;
          const size = req.query.size;
          const status = req.query.status;
          const division = req.query.division;
          const type = req.query.type;
+         const bedrooms = parseInt(req.query.bedrooms);
+         const price = parseInt(req.query.price);
          console.log(division);
          // Build the query object dynamically
          let query = {};
@@ -62,6 +105,12 @@ async function run() {
          }
          if (type) {
             query["category"] = type;
+         }
+         if (bedrooms) {
+            query["bedrooms"] = bedrooms;
+         }
+         if (price) {
+            query["price"] = { $lte: parseInt(price) };
          }
 
          console.log(query);
